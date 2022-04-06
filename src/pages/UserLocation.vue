@@ -1,20 +1,23 @@
 <template>
-    <section class="ui two column centered grid"> 
-        <div class="column">
-            <form action="" class="ui segment large form">
-                <div class="ui message red" v-show="error">{{ error }}</div>
-                <div class="ui segment">
-                    <div class="field">
-                        <div class="ui right icon input large" :class="{loading:spinner}">
-                            <input type="text" placeholder="Enter Your Address" v-model="address" id="autocomplete">
-                            <i class="dot circle link icon" @click="locatorButtonPressed"></i>
+    <div>
+        <section class="ui two column centered grid" style="position: relative; z-index: 1;"> 
+            <div class="column">
+                <form action="" class="ui segment large form">
+                    <div class="ui message red" v-show="error">{{ error }}</div>
+                    <div class="ui segment">
+                        <div class="field">
+                            <div class="ui right icon input large" :class="{loading:spinner}">
+                                <input type="text" placeholder="Enter Your Address" v-model="address" id="autocomplete">
+                                <i class="dot circle link icon" @click="locatorButtonPressed"></i>
+                            </div>
                         </div>
+                        <button class="ui button">Go!</button>
                     </div>
-                    <button class="ui button">Go!</button>
-                </div>
-            </form>
-        </div>
-    </section>
+                </form>
+            </div>
+        </section>
+        <section id="map"></section>
+    </div>
 </template>
 
 <script>
@@ -38,7 +41,9 @@ export default {
             this.spinner = true;
             if(navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
-                        this.getAddressFrom(position.coords.latitude, position.coords.longitude);
+                        this.getAddressFrom(position.coords.latitude, position.coords.longitude
+                        );
+                        this.showUserLocationOnTheMap(position.coords.latitude, position.coords.longitude)
                     },
                     error => {
                         this.error = "Locator is unable to find the address. Please enter your address manually.";
@@ -65,15 +70,47 @@ export default {
                     this.error = error.message
                     this.spinner = false;
                 })
+        },
+        showUserLocationOnTheMap(latitude, longitude) {
+            let map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: new google.maps.LatLng(latitude, longitude),
+            });
+            new google.maps.Marker({
+                position: new google.maps.LatLng(latitude, longitude),
+                map:map
+            })
         }
     }
 }
 </script>
 
 
-<style scoped>
+<style>
 .ui.button, .dot.circle.icon {
     background-color: #ff5a5f;
     color: white;
+}
+.pac-icon {
+    display: none;
+}
+.pac-item {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.pac-item:hover {
+    background-color: #ececec;   
+}
+.pac-item-query {
+    font-size: 16px;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 </style>
