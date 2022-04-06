@@ -11,7 +11,6 @@
                                 <i class="dot circle link icon" @click="locatorButtonPressed"></i>
                             </div>
                         </div>
-                        <button class="ui button">Go!</button>
                     </div>
                 </form>
             </div>
@@ -38,7 +37,8 @@ export default {
         autocomplete.addListener("place_changed", () => {
            let place = autocomplete.getPlace();
            this.showUserLocationOnTheMap(place.geometry.location.lat(), place.geometry.location.lng())
-        })
+        }),
+        this.locatorButtonPressed();
     },
     methods: {
         locatorButtonPressed() {
@@ -60,7 +60,6 @@ export default {
             }
         },
         getAddressFrom(lat, long) {
-            console.log(process.env.VUE_APP_APIKEY)
             axios.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + long + "&key=APIKEY")
                  .then(response => {
                      if(response.data.error_message) {
