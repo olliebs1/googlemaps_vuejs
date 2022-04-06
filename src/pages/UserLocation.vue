@@ -2,7 +2,7 @@
     <section class="ui two column centered grid"> 
         <div class="column">
             <form action="" class="ui segment large form">
-                <div class="ui message red"></div>
+                <div class="ui message red" v-show="error">{{ error }}</div>
                 <div class="ui segment">
                     <div class="field">
                         <div class="ui right icon input large">
@@ -24,6 +24,7 @@ export default {
     data() {
         return {
             address: "",
+            error: "",
         }
     },
     methods: {
@@ -33,11 +34,11 @@ export default {
                         this.getAddressFrom(position.coords.latitude, position.coords.longitude);
                     },
                     error => {
-                        console.log(error.message)
+                        this.error = error.message;
                     }
                 );
             } else {
-                console.log("Your browser does not support geolocation API.");
+                this.error = error.message
             }
         },
         getAddressFrom(lat, long) {
@@ -45,13 +46,13 @@ export default {
             axios.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + long + "&key=APIKEY")
                  .then(response => {
                      if(response.data.error_message) {
-                         console.log(response.data.error_message)
+                         this.error = response.data.error_message
                      } else {
                          this.address = response.data.results[0].formatted_address
                      }
                 })
                 .catch(error => {
-                    console.log(error.message)
+                    this.error = error.message
                 })
         }
     }
