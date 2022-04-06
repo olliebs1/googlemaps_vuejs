@@ -5,7 +5,7 @@
                 <div class="ui message red" v-show="error">{{ error }}</div>
                 <div class="ui segment">
                     <div class="field">
-                        <div class="ui right icon input large">
+                        <div class="ui right icon input large" :class="{loading:spinner}">
                             <input type="text" placeholder="Enter Your Address" v-model="address">
                             <i class="dot circle link icon" @click="locatorButtonPressed"></i>
                         </div>
@@ -25,20 +25,24 @@ export default {
         return {
             address: "",
             error: "",
+            spinner: false,
         }
     },
     methods: {
         locatorButtonPressed() {
+            this.spinner = true;
             if(navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
                         this.getAddressFrom(position.coords.latitude, position.coords.longitude);
                     },
                     error => {
-                        this.error = error.message;
+                        this.error = "Locator is unable to find the address. Please enter your address manually.";
+                        this.spinner = false;
                     }
                 );
             } else {
                 this.error = error.message
+                this.spinner = false;
             }
         },
         getAddressFrom(lat, long) {
@@ -50,9 +54,11 @@ export default {
                      } else {
                          this.address = response.data.results[0].formatted_address
                      }
+                    this.spinner = false;
                 })
                 .catch(error => {
                     this.error = error.message
+                    this.spinner = false;
                 })
         }
     }
