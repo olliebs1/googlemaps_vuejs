@@ -6,7 +6,7 @@
                 <div class="ui segment">
                     <div class="field">
                         <div class="ui right icon input large">
-                            <input type="text" placeholder="Enter Your Address">
+                            <input type="text" placeholder="Enter Your Address" v-model="address">
                             <i class="dot circle link icon" @click="locatorButtonPressed"></i>
                         </div>
                     </div>
@@ -21,6 +21,11 @@
 import axios from "axios";
 
 export default {
+    data() {
+        return {
+            address: "",
+        }
+    },
     methods: {
         locatorButtonPressed() {
             if(navigator.geolocation) {
@@ -42,7 +47,7 @@ export default {
                      if(response.data.error_message) {
                          console.log(response.data.error_message)
                      } else {
-                         console.log(response.data.results[0].formatted_address)
+                         this.address = response.data.results[0].formatted_address
                      }
                 })
                 .catch(error => {
