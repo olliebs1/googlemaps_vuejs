@@ -32,9 +32,13 @@ export default {
         }
     },
     mounted() {
-        new google.maps.places.Autocomplete(
+        let autocomplete = new google.maps.places.Autocomplete(
             document.getElementById("autocomplete")
-        )
+        );
+        autocomplete.addListener("place_changed", () => {
+           let place = autocomplete.getPlace();
+           this.showUserLocationOnTheMap(place.geometry.location.lat(), place.geometry.location.lng())
+        })
     },
     methods: {
         locatorButtonPressed() {
