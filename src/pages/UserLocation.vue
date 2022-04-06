@@ -6,7 +6,7 @@
                 <div class="ui segment">
                     <div class="field">
                         <div class="ui right icon input large" :class="{loading:spinner}">
-                            <input type="text" placeholder="Enter Your Address" v-model="address">
+                            <input type="text" placeholder="Enter Your Address" v-model="address" id="autocomplete">
                             <i class="dot circle link icon" @click="locatorButtonPressed"></i>
                         </div>
                     </div>
@@ -27,6 +27,11 @@ export default {
             error: "",
             spinner: false,
         }
+    },
+    mounted() {
+        new google.maps.places.Autocomplete(
+            document.getElementById("autocomplete")
+        )
     },
     methods: {
         locatorButtonPressed() {
