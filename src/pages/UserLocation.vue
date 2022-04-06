@@ -18,13 +18,14 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
     methods: {
         locatorButtonPressed() {
             if(navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
-                        console.log(position.coords.latitude);
-                        console.log(position.coords.longitude);
+                        this.getAddressFrom(position.coords.latitude, position.coords.longitude);
                     },
                     error => {
                         console.log(error.message)
@@ -33,6 +34,20 @@ export default {
             } else {
                 console.log("Your browser does not support geolocation API.");
             }
+        },
+        getAddressFrom(lat, long) {
+            console.log(process.env.VUE_APP_APIKEY)
+            axios.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + long + "&key=APIKEY")
+                 .then(response => {
+                     if(response.data.error_message) {
+                         console.log(response.data.error_message)
+                     } else {
+                         console.log(response.data.results[0].formatted_address)
+                     }
+                })
+                .catch(error => {
+                    console.log(error.message)
+                })
         }
     }
 }
