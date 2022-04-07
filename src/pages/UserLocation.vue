@@ -6,11 +6,18 @@
                     <div class="ui message red" v-show="error">{{ error }}</div>
                     <div class="ui segment">
                         <div class="field">
-                            <div class="ui right icon input large" :class="{loading:spinner}">
-                                <input type="text" placeholder="Enter Your Address" v-model="address" id="autocomplete">
-                                <i class="dot circle link icon" @click="locatorButtonPressed"></i>
+                            <div class="ui right icon input large" :class="{loading:originSpinner}">
+                                <input type="text" placeholder="Origin" v-model="origin" id="autocomplete">
+                                <i class="dot circle link icon" @click="originLocatorButtonPressed"></i>
                             </div>
                         </div>
+                        <div class="field">
+                            <div class="ui right icon input large" :class="{loading:destinationSpinner}">
+                                <input type="text" placeholder="Destination" v-model="destination" id="autocomplete">
+                                <i class="dot circle link icon" @click="destinationLocatorButtonPressed"></i>
+                            </div>
+                        </div>
+                        <button class="ui right inverted primary button">Directions</button>
                     </div>
                 </form>
             </div>
@@ -25,9 +32,11 @@ import axios from "axios";
 export default {
     data() {
         return {
-            address: "",
+            origin: "",
+            destination: "",
             error: "",
-            spinner: false,
+            originSpinner: false,
+            destinationSpinner: false,
         }
     },
     mounted() {
@@ -38,14 +47,14 @@ export default {
            let place = autocomplete.getPlace();
            this.showUserLocationOnTheMap(place.geometry.location.lat(), place.geometry.location.lng())
         }),
-        this.locatorButtonPressed();
+        this.originLocatorButtonPressed();
     },
     methods: {
-        locatorButtonPressed() {
+        originLocatorButtonPressed() {
             this.spinner = true;
             if(navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
-                        this.getAddressFrom(position.coords.latitude, position.coords.longitude
+                        this.getOriginFrom(position.coords.latitude, position.coords.longitude
                         );
                         this.showUserLocationOnTheMap(position.coords.latitude, position.coords.longitude)
                     },
@@ -59,13 +68,46 @@ export default {
                 this.spinner = false;
             }
         },
-        getAddressFrom(lat, long) {
+        destinationLocatorButtonPressed() {
+            this.spinner = true;
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                        this.getDestinationFrom(position.coords.latitude, position.coords.longitude
+                        );
+                        this.showUserLocationOnTheMap(position.coords.latitude, position.coords.longitude)
+                    },
+                    error => {
+                        this.error = "Locator is unable to find the address. Please enter your address manually.";
+                        this.spinner = false;
+                    }
+                );
+            } else {
+                this.error = error.message
+                this.spinner = false;
+            }
+        },
+        getOriginFrom(lat, long) {
             axios.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + long + "&key=APIKEY")
                  .then(response => {
                      if(response.data.error_message) {
                          this.error = response.data.error_message
                      } else {
-                         this.address = response.data.results[0].formatted_address
+                         this.origin = response.data.results[0].formatted_address
+                     }
+                    this.spinner = false;
+                })
+                .catch(error => {
+                    this.error = error.message
+                    this.spinner = false;
+                })
+        },
+        getDestinationFrom(lat, long) {
+            axios.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + long + "&key=APIKEY")
+                 .then(response => {
+                     if(response.data.error_message) {
+                         this.error = response.data.error_message
+                     } else {
+                         this.destination = response.data.results[0].formatted_address
                      }
                     this.spinner = false;
                 })
@@ -76,7 +118,7 @@ export default {
         },
         showUserLocationOnTheMap(latitude, longitude) {
             let map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
+                zoom: 13,
                 center: new google.maps.LatLng(latitude, longitude),
             });
             new google.maps.Marker({
