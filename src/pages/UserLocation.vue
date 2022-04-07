@@ -4,20 +4,34 @@
             <div class="column">
                 <form action="" class="ui segment large form">
                     <div class="ui message red" v-show="error">{{ error }}</div>
-                    <div class="ui segment">
+                    <div class="ui segment" v-if="singleSearch">
                         <div class="field">
                             <div class="ui right icon input large" :class="{loading:originSpinner}">
-                                <input type="text" placeholder="Origin" v-model="origin" id="autocomplete">
+                                <input type="text" placeholder="Search Map" v-model="origin" id="originAutoComplete">
+                                <i class="dot circle link icon" @click="originLocatorButtonPressed"></i>
+                            </div>
+                        </div>
+                        <button class="ui right inverted primary button" @click="directionSearch">Directions</button>
+                    </div>
+                    <div class="ui segment" v-else>
+                        <div class="field">
+                            <div class="ui right icon input large" :class="{loading:originSpinner}">
+                                <input type="text" placeholder="Origin" v-model="origin" id="originAutoComplete">
                                 <i class="dot circle link icon" @click="originLocatorButtonPressed"></i>
                             </div>
                         </div>
                         <div class="field">
                             <div class="ui right icon input large" :class="{loading:destinationSpinner}">
-                                <input type="text" placeholder="Destination" v-model="destination" id="autocomplete">
+                                <input type="text" placeholder="Destination" v-model="destination" id="destinationAutoComplete">
                                 <i class="dot circle link icon" @click="destinationLocatorButtonPressed"></i>
                             </div>
                         </div>
-                        <button class="ui right inverted primary button">Directions</button>
+                        <button class="ui right inverted primary button" v-if="directionButton">Directions</button>
+                        <div class="ui buttons" v-else>
+                        <button class="ui button">Cancel</button>
+                        <div class="or"></div>
+                        <button class="ui primary button">Direct</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -34,22 +48,38 @@ export default {
         return {
             origin: "",
             destination: "",
+            singleSearch: true,
+            directionButton: true,
+            cancelSwitch: false,
             error: "",
             originSpinner: false,
             destinationSpinner: false,
         }
     },
     mounted() {
-        let autocomplete = new google.maps.places.Autocomplete(
-            document.getElementById("autocomplete")
+        let originAutocomplete = new google.maps.places.Autocomplete(
+            document.getElementById("originAutoComplete")
         );
-        autocomplete.addListener("place_changed", () => {
+        originAutocomplete.addListener("place_changed", () => {
            let place = autocomplete.getPlace();
            this.showUserLocationOnTheMap(place.geometry.location.lat(), place.geometry.location.lng())
-        }),
+        });
         this.originLocatorButtonPressed();
     },
     methods: {
+        directionSearch() {
+            this.singleSearch = false;
+            this.directionButton = false;
+            this.cancelSwitch = true;
+
+             let destinationAutocomplete = new google.maps.places.Autocomplete(
+            document.getElementById("originAutoComplete")
+        );
+        destinationAutocomplete.addListener("place_changed", () => {
+           let place = autocomplete.getPlace();
+           this.showUserLocationOnTheMap(place.geometry.location.lat(), place.geometry.location.lng())
+        });
+        },
         originLocatorButtonPressed() {
             this.spinner = true;
             if(navigator.geolocation) {
